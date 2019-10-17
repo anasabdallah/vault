@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vault
+  labels:
+    app: vault
+spec:
+  replicas: {{.Values.SCALE}}
+  selector:
+    matchLabels:
+      app: vault
+  template:
+    metadata:
+      labels:
+        app: vault
+    spec:
+      containers:
+        - image: {{.Values.IMAGE}}
+          imagePullPollicy: Always
+          securityContext:
+            capabilities:
+              add:
+                - IPC_LOCK
+
+          name: vault
+          ports:
+            - containerPort: {{.Values.CONTAINER_PORT}}
+              name: vault
+          volumeMounts:
+            - name: vault-persistent-storage
+              mountPath: /app/data
+      volumes:
+        - name: vault-persistent-storage
+          persistentVolumeClaim:
+            claimName: vault-volumeclaim
